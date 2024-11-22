@@ -7,7 +7,7 @@ zap_baseline:
 
     - name: Run OWASP ZAP Baseline Scan
       run: |
-        TARGET_URL="${{ secrets.TARGET_URL }}"
+        TARGET_URL="https://coride.site"
         docker run --user root --rm -v $(pwd):/zap/wrk:rw -w /zap zaproxy/zap-stable zap-baseline.py \
           -t $TARGET_URL \
           -J zap-output.json \
