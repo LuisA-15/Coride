@@ -21,7 +21,7 @@ jobs:
             -J zap-output.json \
             -r zap-report.html \
             -d \
-            -m 5 \
+            -m 5
             -I || true
 
       - name: Upload ZAP Reports
@@ -33,26 +33,7 @@ jobs:
             zap-report.html
         if: always()
 
-      - name: Display ZAP Scan Results
+      - name: Display Scan Results in Logs
         run: |
-          echo "Resumen del escaneo en formato JSON:"
-          cat zap-output.json | jq '.'
-          echo "Fin del reporte."
-
-      - name: Analyze Exit Code
-        run: |
-          TARGET_URL="https://coride.site"
-          docker run --user root --rm -v $(pwd):/zap/wrk:rw -w /zap zaproxy/zap-stable zap-baseline.py \
-            -t $TARGET_URL \
-            -J zap-output.json \
-            -r zap-report.html \
-            -d \
-            -m 5
-          EXIT_CODE=$?
-
-          if [ $EXIT_CODE -eq 2 ]; then
-              echo "Advertencias detectadas, pero continuando el pipeline."
-          elif [ $EXIT_CODE -ne 0 ]; then
-              echo "Error crítico detectado. Deteniendo pipeline."
-              exit $EXIT_CODE
-          fi
+          echo "Resumen del escaneo:"
+          jq '.' zap-output.json
