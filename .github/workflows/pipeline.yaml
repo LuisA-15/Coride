@@ -22,6 +22,7 @@ jobs:
             -r zap-report.html \
             -d \
             -m 5
+            -I
 
       - name: Upload ZAP Reports
         uses: actions/upload-artifact@v4
