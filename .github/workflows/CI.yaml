@@ -1,4 +1,4 @@
-name: Combined SAST and DAST Pipeline
+name: SAST and DAST Parallel Execution
 
 on:
   push:
@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  setup:
-    name: Initial Setup
+  integration:
+    name: Integration Setup
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -25,25 +25,39 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-  sast_and_dast:
-    needs: setup
+  sast:
+    name: SAST Analysis
+    needs: integration
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        job: [sast, dast]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run SAST (CodeQL)
-        if: matrix.job == 'sast'
-        uses: github/codeql-action/analyze@v3
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
         with:
           languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
           output: 'codeql-results.sarif'
 
-      - name: Run DAST (ZAP)
-        if: matrix.job == 'dast'
+      - name: Upload SAST Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: sast-results-${{ github.sha }}
+          path: codeql-results.sarif
+
+  dast:
+    name: DAST Analysis
+    needs: integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull OWASP ZAP Docker Image
+        run: docker pull zaproxy/zap-stable
+
+      - name: Run OWASP ZAP Baseline Scan
         run: |
           TARGET_URL="https://coride.site"
           docker run --user root --rm -v $(pwd):/zap/wrk:rw -w /zap zaproxy/zap-stable zap-baseline.py \
@@ -53,12 +67,10 @@ jobs:
             -d \
             -m 5 || true
 
-      - name: Upload Results
+      - name: Upload DAST Results
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.job }}-results-${{ github.sha }}
+          name: dast-results-${{ github.sha }}
           path: |
-            codeql-results.sarif
             zap-output.json
             zap-report.html
-        if: always()
