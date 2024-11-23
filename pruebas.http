@@ -155,3 +155,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjM1Y
 ###
 GET http://localhost:3000/profile-name/userA@hotmail.com
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NjNiYmNmNDliZjFlM2VjZDI5M2RkYTkiLCJpYXQiOjE3MTUxOTE5MTcsImV4cCI6MTcxNTE5OTExN30.ujh3_0KPiGHeDxFtoPfNst6KashpU3M9Ze71qwhH7LU
+
+
+##Este es un cambio
